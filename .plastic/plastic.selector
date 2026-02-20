@@ -1,0 +1,4 @@
+repository "Finalgame@tj_wechat_os_qy0_zsobj3dobfor_vqjh8uby@cloud.cn"
+  path "/"
+    br "/main"
+    co "/main"
