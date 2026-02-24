@@ -14,6 +14,8 @@ public class Platform1move : MonoBehaviour
     public bool stopOnExit = false;
     [Tooltip("List of tags that will trigger the platform. Add Player, Player1, Player2 etc.")]
     public string[] triggerTags = new string[] { "Player" };
+    [Tooltip("If true, platform goes back to Pos1 when reset (e.g. on respawn).")]
+    [SerializeField] private bool resetToPos1OnRespawn = true;
 
     private bool IsTriggerTag(Collider2D col)
     {
@@ -36,6 +38,20 @@ public class Platform1move : MonoBehaviour
         }
         return false;
     }
+
+    public void ResetPlatformState()
+    {
+        shouldMove = false;
+        MovePos = Pos1;
+
+        if (resetToPos1OnRespawn && Pos1 != null)
+        {
+            transform.position = Pos1.position;
+        }
+
+        Debug.Log($"[Platform1move] '{name}' reset: shouldMove=false, position={(resetToPos1OnRespawn ? "Pos1" : "keep current")}");
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -93,8 +109,9 @@ public class Platform1move : MonoBehaviour
         {
             Debug.Log($"Platform '{name}' OnTriggerEnter by '{collision.name}' tag '{collision.tag}' ignored");
         }
-    }  
-private void OnTriggerExit2D(Collider2D collision)
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
     {
         // only restore parent for objects we previously parented
         if (IsTriggerTag(collision))

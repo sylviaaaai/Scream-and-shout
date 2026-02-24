@@ -38,7 +38,7 @@ public class HealthUI : MonoBehaviour
         // 更新文本显示
         if (healthText != null)
         {
-            healthText.text = $"生命: {currentHealth}/3";
+            healthText.text = $"life: {currentHealth}/3";
         }
 
         // 更新图片显示（如果有的话）
@@ -60,7 +60,7 @@ public class HealthUI : MonoBehaviour
     /// </summary>
     private void OnPlayerDead()
     {
-        Debug.Log("游戏结束 - 玩家没有生命了！");
+        Debug.Log("Game Over - Player has no health left!");
         // 这里可以显示游戏结束UI、停止游戏等
         // Time.timeScale = 0; // 暂停游戏
     }

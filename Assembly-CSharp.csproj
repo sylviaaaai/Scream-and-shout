@@ -64,10 +64,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\script\Menu.cs" />
+    <Compile Include="Assets\script\GameOverUI.cs" />
     <Compile Include="Assets\script\Player\HealthManager.cs" />
     <Compile Include="Assets\script\Player\PlayerMove.cs" />
     <Compile Include="Assets\script\Player\PlayerPlatformAttachment.cs" />
-    <Compile Include="Assets\script\Player\Platform1move.cs" />
+    <Compile Include="Assets\script\Platform1move.cs" />
+    <Compile Include="Assets\script\LevelEndTrigger.cs" />
+    <Compile Include="Assets\script\SawMove.cs" />
+    <Compile Include="Assets\script\Player\PlayerJump.cs" />
+    <Compile Include="Assets\script\RespawnPoint.cs" />
+    <Compile Include="Assets\script\Player\PlayerSpawnController.cs" />
+    <Compile Include="Assets\script\RestartButton.cs" />
     <Compile Include="Assets\SerialInput.cs" />
     <Compile Include="Assets\script\Player\PlayerDead.cs" />
     <Compile Include="Assets\script\Player\HealthUI.cs" />
