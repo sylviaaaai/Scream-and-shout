@@ -37,6 +37,7 @@ public class PlayerMove : MonoBehaviour
     private void Start()
     {
         anim = GetComponent<Animator>();
+        useVoiceSpeed = GameModeConfig.UseVoiceSpeed;
 
         if (platformAttachment == null)
         {

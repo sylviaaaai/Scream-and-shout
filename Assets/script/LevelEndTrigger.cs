@@ -60,6 +60,13 @@ public class LevelEndTrigger : MonoBehaviour
     public void RestartLevel()
     {
         Time.timeScale = 1f;
+        MonsterCleanup.ClearAllMonsters();
+
+        if (HealthManager.Instance != null)
+        {
+            HealthManager.Instance.ResetHealth();
+        }
+
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

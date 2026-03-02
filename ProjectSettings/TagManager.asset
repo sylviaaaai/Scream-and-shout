@@ -6,6 +6,7 @@ TagManager:
   tags:
   - traps
   - StartPoint
+  - Monster
   layers:
   - Default
   - TransparentFX
@@ -14,8 +15,8 @@ TagManager:
   - Water
   - UI
   - Player
-  - 
-  - 
+  - Obstacle
+  - Monster
   - 
   - 
   - 

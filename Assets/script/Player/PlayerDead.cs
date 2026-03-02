@@ -5,6 +5,9 @@ public class PlayerDead : MonoBehaviour
 {
     [SerializeField] private string[] trapTags = { "traps", "Traps", "trap", "Trap" };
     [SerializeField] private LayerMask trapLayers;
+    [SerializeField] private string[] monsterTags = { "Monster", "monster" };
+    [SerializeField] private LayerMask monsterLayers;
+    [SerializeField] private bool destroyMonsterAfterDamage = true;
     [SerializeField] private float damageCooldown = 0.5f;
     [SerializeField] private bool respawnOnTrapDamage = true;
     [SerializeField] private bool respawnOnOutOfBoundsDamage = true;
@@ -40,6 +43,19 @@ public class PlayerDead : MonoBehaviour
     private void TryDamage(GameObject other, string hitType)
     {
         Debug.Log($"PlayerDead hit by {hitType}: {other.name}, tag={other.tag}");
+
+        if (IsMonsterObject(other))
+        {
+            TakeDamage("Player hit monster", respawnOnTrapDamage);
+
+            if (destroyMonsterAfterDamage)
+            {
+                DestroyMonsterObject(other);
+            }
+
+            return;
+        }
+
         if (!IsTrapObject(other))
         {
             Debug.Log($"Ignored non-trap hit: {other.name}, root={other.transform.root.name}, layer={LayerMask.LayerToName(other.layer)}");
@@ -69,36 +85,30 @@ public class PlayerDead : MonoBehaviour
         return false;
     }
 
-    private bool HasTrapLayerInHierarchy(Transform t)
+    private bool IsMonsterObject(GameObject other)
     {
-        Transform current = t;
-        while (current != null)
+        if (other == null)
         {
-            if (IsInTrapLayer(current.gameObject))
-            {
-                return true;
-            }
-
-            current = current.parent;
+            return false;
         }
 
-        return false;
+        if (HasLayerInHierarchy(other.transform, monsterLayers) || HasTagInHierarchy(other.transform, monsterTags))
+        {
+            return true;
+        }
+
+        // Fallback: if the collided object belongs to a spawned monster prefab.
+        return other.GetComponentInParent<MonsterMover>() != null;
+    }
+
+    private bool HasTrapLayerInHierarchy(Transform t)
+    {
+        return HasLayerInHierarchy(t, trapLayers);
     }
 
     private bool HasTrapTagInHierarchy(Transform t)
     {
-        Transform current = t;
-        while (current != null)
-        {
-            if (HasTrapTag(current.gameObject))
-            {
-                return true;
-            }
-
-            current = current.parent;
-        }
-
-        return false;
+        return HasTagInHierarchy(t, trapTags);
     }
 
     private bool IsInTrapLayer(GameObject obj)
@@ -109,14 +119,52 @@ public class PlayerDead : MonoBehaviour
 
     private bool HasTrapTag(GameObject obj)
     {
-        if (trapTags == null)
+        return HasAnyTag(obj, trapTags);
+    }
+
+    private bool HasLayerInHierarchy(Transform t, LayerMask targetLayers)
+    {
+        Transform current = t;
+        while (current != null)
+        {
+            int layerMaskValue = 1 << current.gameObject.layer;
+            if ((targetLayers.value & layerMaskValue) != 0)
+            {
+                return true;
+            }
+
+            current = current.parent;
+        }
+
+        return false;
+    }
+
+    private bool HasTagInHierarchy(Transform t, string[] tags)
+    {
+        Transform current = t;
+        while (current != null)
+        {
+            if (HasAnyTag(current.gameObject, tags))
+            {
+                return true;
+            }
+
+            current = current.parent;
+        }
+
+        return false;
+    }
+
+    private bool HasAnyTag(GameObject obj, string[] tags)
+    {
+        if (tags == null)
         {
             return false;
         }
 
-        for (int i = 0; i < trapTags.Length; i++)
+        for (int i = 0; i < tags.Length; i++)
         {
-            string tagName = trapTags[i];
+            string tagName = tags[i];
             if (!string.IsNullOrWhiteSpace(tagName) && obj.CompareTag(tagName))
             {
                 return true;
@@ -124,6 +172,23 @@ public class PlayerDead : MonoBehaviour
         }
 
         return false;
+    }
+
+    private void DestroyMonsterObject(GameObject collidedObject)
+    {
+        if (collidedObject == null)
+        {
+            return;
+        }
+
+        MonsterMover monster = collidedObject.GetComponentInParent<MonsterMover>();
+        if (monster != null)
+        {
+            Destroy(monster.gameObject);
+            return;
+        }
+
+        Destroy(collidedObject);
     }
 
     private void TakeDamage(string reason, bool respawnAtCheckpointIfAlive)

@@ -5,12 +5,15 @@ using UnityEngine.SceneManagement;
 
 public class Menu : MonoBehaviour
 {
-  public void GameStart()
+    public void GameStart()
     {
+        GameModeConfig.UseVoiceSpeed = false;
         SceneManager.LoadScene(1);
     }
-public void GameExit()
+
+    public void GameExit()
     {
-        Application.Quit();
+        GameModeConfig.UseVoiceSpeed = true;
+        SceneManager.LoadScene(1);
     }
 }

@@ -67,6 +67,7 @@ public class GameOverUI : MonoBehaviour
     public void RestartLevel()
     {
         Time.timeScale = 1f;
+        MonsterCleanup.ClearAllMonsters();
 
         if (HealthManager.Instance != null)
         {

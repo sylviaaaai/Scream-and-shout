@@ -63,9 +63,15 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\2022.3.61f1c1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\script\BackToMenuButton.cs" />
     <Compile Include="Assets\script\Menu.cs" />
     <Compile Include="Assets\script\GameOverUI.cs" />
+    <Compile Include="Assets\script\GameModeConfig.cs" />
+    <Compile Include="Assets\script\Monster\MonsterMover.cs" />
+    <Compile Include="Assets\script\Monster\ObstacleSpawner.cs" />
     <Compile Include="Assets\script\Player\HealthManager.cs" />
+    <Compile Include="Assets\script\Monster\SpawnedObstacleMarker.cs" />
+    <Compile Include="Assets\script\Monster\MonsterCleanup.cs" />
     <Compile Include="Assets\script\Player\PlayerMove.cs" />
     <Compile Include="Assets\script\Player\PlayerPlatformAttachment.cs" />
     <Compile Include="Assets\script\Platform1move.cs" />
@@ -78,6 +84,7 @@
     <Compile Include="Assets\SerialInput.cs" />
     <Compile Include="Assets\script\Player\PlayerDead.cs" />
     <Compile Include="Assets\script\Player\HealthUI.cs" />
+    <Compile Include="Assets\script\Monster\MonsterSpawner.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
@@ -967,6 +974,10 @@
       <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.Runtime.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="com.unity.cinemachine.editor">
+      <HintPath>Library\ScriptAssemblies\com.unity.cinemachine.editor.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="endel.nativewebsocket">
       <HintPath>Library\ScriptAssemblies\endel.nativewebsocket.dll</HintPath>
       <Private>False</Private>
@@ -1173,6 +1184,10 @@
     </Reference>
     <Reference Include="Unity.VisualScripting.State">
       <HintPath>Library\ScriptAssemblies\Unity.VisualScripting.State.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Cinemachine">
+      <HintPath>Library\ScriptAssemblies\Cinemachine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.2D.SpriteShape.Editor">

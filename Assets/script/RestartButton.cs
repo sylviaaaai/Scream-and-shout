@@ -20,6 +20,8 @@ public class RestartButton : MonoBehaviour
 
         playerSpawnController.RespawnAtStartAndResetLife();
         ResetAllPlatforms();
+        int clearedMonsters = MonsterCleanup.ClearAllMonsters();
+        Debug.Log($"RestartButton cleared {clearedMonsters} monster(s).");
     }
 
     private void ResetAllPlatforms()
