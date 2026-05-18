@@ -8,6 +8,8 @@ public class MonsterMover : MonoBehaviour
     [SerializeField] private bool useSerialMonsterSpeed = true;
     [SerializeField] private float speedMultiplier = 1f;
     [SerializeField] private SerialInput serialInput;
+    [SerializeField] private bool enableRightShiftSpeed = true;
+    [SerializeField] private float rightShiftSpeed = 12f;
 
     [Header("Direction")]
     [SerializeField] private Vector2 moveDirection = Vector2.right;
@@ -71,6 +73,11 @@ public class MonsterMover : MonoBehaviour
 
     private float ResolveCurrentSpeed()
     {
+        if (enableRightShiftSpeed && Input.GetKey(KeyCode.RightShift))
+        {
+            return Mathf.Max(0f, rightShiftSpeed * speedMultiplier);
+        }
+
         if (useSerialMonsterSpeed && serialInput != null)
         {
             return Mathf.Max(0f, serialInput.monsterSpeed * speedMultiplier);

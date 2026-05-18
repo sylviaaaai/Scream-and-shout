@@ -1,8 +1,22 @@
 using UnityEngine;
 using TMPro;
+#if UNITY_WEBGL && !UNITY_EDITOR
+using System.Runtime.InteropServices;
+#endif
 
 public class PlayerMove : MonoBehaviour
 {
+#if UNITY_WEBGL && !UNITY_EDITOR
+    [DllImport("__Internal")]
+    private static extern void WebGLMicrophone_Start();
+
+    [DllImport("__Internal")]
+    private static extern float WebGLMicrophone_GetVolume();
+
+    [DllImport("__Internal")]
+    private static extern void WebGLMicrophone_Stop();
+#endif
+
     public Rigidbody2D rb;
     private Animator anim;
     public PlayerPlatformAttachment platformAttachment;
@@ -11,10 +25,28 @@ public class PlayerMove : MonoBehaviour
 
     [Header("Movement")]
     public float Movespeed = 6f;
+    [Tooltip("Allow keyboard controls when serial input is missing, or for quick editor testing")]
+    public bool enableKeyboardFallback = true;
     [Tooltip("Enable to use serial speedValue (microphone) instead of Movespeed")]
     public bool useVoiceSpeed = false;
     [Tooltip("Multiplier applied to serial speedValue when voice speed is enabled")]
     public float voiceSpeedMultiplier = 1f;
+
+    [Header("Voice Speed")]
+    [Tooltip("Use microphone volume to control speed when voice speed mode is enabled")]
+    public bool useMicrophoneVoiceSpeed = true;
+    [Tooltip("Optional microphone device name. Leave empty to use the default device")]
+    public string microphoneDeviceName = "";
+    [Tooltip("Small volumes below this value are ignored")]
+    public float voiceNoiseFloor = 0.02f;
+    [Tooltip("How strongly microphone volume affects movement speed")]
+    public float voiceSensitivity = 30f;
+    [Tooltip("Minimum speed while voice speed mode is active")]
+    public float minVoiceMoveSpeed = 2f;
+    [Tooltip("Maximum speed while voice speed mode is active")]
+    public float maxVoiceMoveSpeed = 12f;
+    [Tooltip("How quickly speed reacts to volume changes")]
+    public float voiceSpeedSmoothing = 10f;
 
     [Tooltip("Horizontal acceleration applied when starting to run")]
     public float acceleration = 40f;
@@ -33,6 +65,10 @@ public class PlayerMove : MonoBehaviour
 
     private bool wasRunning = false;
     private bool wasGrounded = false;
+    private AudioClip microphoneClip;
+    private string activeMicrophoneDevice;
+    private float smoothedVoiceSpeed;
+    private const int VoiceSampleWindow = 128;
 
     private void Start()
     {
@@ -48,6 +84,8 @@ public class PlayerMove : MonoBehaviour
         {
             playerJump = GetComponent<PlayerJump>();
         }
+
+        StartMicrophoneIfNeeded();
     }
 
     private void Update()
@@ -83,6 +121,16 @@ public class PlayerMove : MonoBehaviour
 
     private float GetActiveMoveSpeed()
     {
+        if (useVoiceSpeed && useMicrophoneVoiceSpeed && microphoneClip != null)
+        {
+            float targetSpeed = ResolveMicrophoneSpeed();
+            smoothedVoiceSpeed = Mathf.Lerp(
+                smoothedVoiceSpeed,
+                targetSpeed,
+                1f - Mathf.Exp(-voiceSpeedSmoothing * Time.fixedDeltaTime));
+            return smoothedVoiceSpeed;
+        }
+
         if (useVoiceSpeed && serial != null)
         {
             return Mathf.Max(0f, serial.speedValue * voiceSpeedMultiplier);
@@ -93,15 +141,26 @@ public class PlayerMove : MonoBehaviour
 
     private void ReadInputFlags()
     {
-        if (serial == null)
+        bool serialRun = false;
+        bool serialJump = false;
+        bool hasSerial = serial != null;
+
+        if (hasSerial)
         {
-            IsRUN = false;
-            isjump = false;
-            return;
+            serialRun = serial.moveValue == 0;
+            serialJump = serial.jumpValue == 0;
         }
 
-        IsRUN = serial.moveValue == 0;
-        isjump = serial.jumpValue == 0;
+        bool keyboardRun = false;
+        bool keyboardJump = false;
+        if (enableKeyboardFallback)
+        {
+            keyboardRun = Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow);
+            keyboardJump = Input.GetKey(KeyCode.Space) || Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow);
+        }
+
+        IsRUN = serialRun || keyboardRun;
+        isjump = serialJump || keyboardJump;
     }
 
     private void HandleRunStartDetach()
@@ -174,5 +233,87 @@ public class PlayerMove : MonoBehaviour
 
         float currentSpeed = Mathf.Abs(rb.velocity.x);
         speedText.text = $"{speedTextPrefix}: {currentSpeed:0.0}";
+    }
+
+    private void StartMicrophoneIfNeeded()
+    {
+        smoothedVoiceSpeed = minVoiceMoveSpeed;
+
+        if (!useVoiceSpeed || !useMicrophoneVoiceSpeed)
+        {
+            return;
+        }
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+        WebGLMicrophone_Start();
+        microphoneClip = AudioClip.Create("WebGLMicrophone", VoiceSampleWindow, 1, AudioSettings.outputSampleRate, false);
+#else
+        if (Microphone.devices.Length == 0)
+        {
+            Debug.LogWarning("Voice speed is enabled, but no microphone device was found.");
+            return;
+        }
+
+        activeMicrophoneDevice = string.IsNullOrWhiteSpace(microphoneDeviceName)
+            ? Microphone.devices[0]
+            : microphoneDeviceName;
+
+        microphoneClip = Microphone.Start(activeMicrophoneDevice, true, 1, AudioSettings.outputSampleRate);
+#endif
+    }
+
+    private float ResolveMicrophoneSpeed()
+    {
+        float volume = GetMicrophoneVolume();
+        float usableVolume = Mathf.Max(0f, volume - voiceNoiseFloor);
+        float targetSpeed = minVoiceMoveSpeed + usableVolume * voiceSensitivity;
+        return Mathf.Clamp(targetSpeed, minVoiceMoveSpeed, maxVoiceMoveSpeed);
+    }
+
+    private float GetMicrophoneVolume()
+    {
+#if UNITY_WEBGL && !UNITY_EDITOR
+        return WebGLMicrophone_GetVolume();
+#else
+        int position = Microphone.GetPosition(activeMicrophoneDevice);
+        if (position <= 0)
+        {
+            return 0f;
+        }
+
+        float[] samples = new float[VoiceSampleWindow];
+        int startPosition = position - VoiceSampleWindow;
+        if (startPosition < 0)
+        {
+            startPosition += microphoneClip.samples;
+        }
+
+        microphoneClip.GetData(samples, startPosition);
+
+        float sum = 0f;
+        for (int i = 0; i < samples.Length; i++)
+        {
+            sum += samples[i] * samples[i];
+        }
+
+        return Mathf.Sqrt(sum / samples.Length);
+#endif
+    }
+
+    private void OnDestroy()
+    {
+        if (microphoneClip == null)
+        {
+            return;
+        }
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+        WebGLMicrophone_Stop();
+#else
+        if (!string.IsNullOrEmpty(activeMicrophoneDevice) && Microphone.IsRecording(activeMicrophoneDevice))
+        {
+            Microphone.End(activeMicrophoneDevice);
+        }
+#endif
     }
 }

@@ -5,6 +5,7 @@ using UnityEngine;
 public class SerialInput : MonoBehaviour
 {
     [Header("Serial")]
+    [SerializeField] private bool enableSerialInput = false;
     [SerializeField] private string portName = "COM3";
     [SerializeField] private int baudRate = 230400;
     [SerializeField] private int readTimeoutMs = 5;
@@ -29,6 +30,11 @@ public class SerialInput : MonoBehaviour
     {
         startupTime = Time.unscaledTime;
         ApplyNeutralInput();
+
+        if (!enableSerialInput)
+        {
+            return;
+        }
 
         try
         {

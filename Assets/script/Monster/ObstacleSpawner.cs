@@ -10,6 +10,8 @@ public class ObstacleSpawner : MonoBehaviour
     [SerializeField] private Transform spawnedParent;
 
     [Header("Spawn")]
+    [SerializeField] private bool enableKeyboardSpawn = true;
+    [SerializeField] private KeyCode keyboardSpawnKey = KeyCode.K;
     [SerializeField] private bool spawnOnObstacleReadyFallingEdge = true;
     [SerializeField] private float spawnYOffset = 0f;
     [SerializeField] private bool requireArmedReadyState = true;
@@ -37,7 +39,17 @@ public class ObstacleSpawner : MonoBehaviour
 
     private void Update()
     {
-        if (serialInput == null || obstaclePrefab == null)
+        if (obstaclePrefab == null)
+        {
+            return;
+        }
+
+        if (enableKeyboardSpawn && Input.GetKeyDown(keyboardSpawnKey))
+        {
+            TrySpawnObstacle();
+        }
+
+        if (serialInput == null)
         {
             return;
         }
@@ -92,13 +104,11 @@ public class ObstacleSpawner : MonoBehaviour
                 return;
             }
 
-            if (Time.time - lastSpawnTime < minSpawnIntervalSeconds)
+            if (!TrySpawnObstacle())
             {
                 return;
             }
 
-            SpawnObstacle();
-            lastSpawnTime = Time.time;
             hasSpawnedInCurrentNotReadyWindow = true;
         }
     }
@@ -144,5 +154,17 @@ public class ObstacleSpawner : MonoBehaviour
         }
 
         return transform.position + new Vector3(0f, spawnYOffset, 0f);
+    }
+
+    private bool TrySpawnObstacle()
+    {
+        if (Time.time - lastSpawnTime < minSpawnIntervalSeconds)
+        {
+            return false;
+        }
+
+        SpawnObstacle();
+        lastSpawnTime = Time.time;
+        return true;
     }
 }

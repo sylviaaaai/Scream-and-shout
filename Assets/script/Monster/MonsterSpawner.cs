@@ -10,6 +10,8 @@ public class MonsterSpawner : MonoBehaviour
     [SerializeField] private Transform spawnedParent;
 
     [Header("Spawn")]
+    [SerializeField] private bool enableKeyboardSpawn = true;
+    [SerializeField] private KeyCode keyboardSpawnKey = KeyCode.J;
     [SerializeField] private bool spawnOnMonsterReadyFallingEdge = true;
     [SerializeField] private float spawnYOffset = 0f;
     [SerializeField] private bool requireArmedReadyState = true;
@@ -37,7 +39,17 @@ public class MonsterSpawner : MonoBehaviour
 
     private void Update()
     {
-        if (serialInput == null || monsterPrefab == null)
+        if (monsterPrefab == null)
+        {
+            return;
+        }
+
+        if (enableKeyboardSpawn && Input.GetKeyDown(keyboardSpawnKey))
+        {
+            TrySpawnMonster();
+        }
+
+        if (serialInput == null)
         {
             return;
         }
@@ -94,13 +106,11 @@ public class MonsterSpawner : MonoBehaviour
                 return;
             }
 
-            if (Time.time - lastSpawnTime < minSpawnIntervalSeconds)
+            if (!TrySpawnMonster())
             {
                 return;
             }
 
-            SpawnMonster();
-            lastSpawnTime = Time.time;
             hasSpawnedInCurrentNotReadyWindow = true;
         }
     }
@@ -147,5 +157,17 @@ public class MonsterSpawner : MonoBehaviour
         }
 
         return transform.position + new Vector3(0f, spawnYOffset, 0f);
+    }
+
+    private bool TrySpawnMonster()
+    {
+        if (Time.time - lastSpawnTime < minSpawnIntervalSeconds)
+        {
+            return false;
+        }
+
+        SpawnMonster();
+        lastSpawnTime = Time.time;
+        return true;
     }
 }
