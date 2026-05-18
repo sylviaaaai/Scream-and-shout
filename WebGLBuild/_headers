@@ -1,10 +1,20 @@
-/Build/*.data.br
-  Content-Type: application/octet-stream
-  Content-Encoding: br
+/index.html
+  Cache-Control: no-cache
+
+/
+  Cache-Control: no-cache
+
+/Build/*.loader.js
+  Content-Type: application/javascript
   Cache-Control: public, max-age=31536000, immutable
 
 /Build/*.framework.js.br
   Content-Type: application/javascript
+  Content-Encoding: br
+  Cache-Control: public, max-age=31536000, immutable
+
+/Build/*.data.br
+  Content-Type: application/octet-stream
   Content-Encoding: br
   Cache-Control: public, max-age=31536000, immutable
 
@@ -13,12 +23,5 @@
   Content-Encoding: br
   Cache-Control: public, max-age=31536000, immutable
 
-/Build/*.loader.js
-  Content-Type: application/javascript
-  Cache-Control: public, max-age=31536000, immutable
-
 /TemplateData/*
   Cache-Control: public, max-age=31536000, immutable
-
-/*
-  Cache-Control: no-cache
