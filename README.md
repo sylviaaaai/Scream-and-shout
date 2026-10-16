@@ -1,6 +1,6 @@
 # Scream and Shout
 
-**A two-player Unity × Arduino interactive 2D platformer.**
+**A two-player Unity × Arduino interactive 2D platformer with physical controls and voice-responsive movement.**
 
 This project explores **physical–digital interaction**: instead of controlling a platform game entirely with a keyboard, two players can use Arduino-connected controls to influence the same real-time game. Player 1 races toward the finish; Player 2 tries to stop them by spawning monsters and obstacles.
 
@@ -94,7 +94,7 @@ For hosting, publish the **contents** of `WebGLBuild/` as a static site and ensu
 
 This project uses small Unity components rather than one monolithic player controller. Damage is linked to the health system through events; respawning is handled separately; spawning guards compensate for noisy or held hardware inputs. The physical controller design turns a typical solo platformer into a two-person adversarial interaction.
 
-The screenshots above and hardware photographs were extracted from the author's course final-project documentation and compressed for fast loading.
+The hardware and gameplay images illustrate the physical controller setup and running game.
 
 ## Assets and acknowledgment
 
@@ -102,4 +102,4 @@ Pixel-art character/environment assets use **[Pixel Adventure 1](https://assetst
 
 ---
 
-*Course project: Scream and Shout — Unity, Arduino, and physical interaction design.*
+*Scream and Shout · Unity × Arduino · Physical Interaction Design*
