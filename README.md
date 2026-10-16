@@ -1,105 +1,145 @@
-# Scream and Shout
+# Scream and Shout 🎮
 
-**A two-player Unity × Arduino interactive 2D platformer with physical controls and voice-responsive movement.**
+**A two-player, hardware-interactive 2D platformer built with Unity, C#, and Arduino.**
 
-This project explores **physical–digital interaction**: instead of controlling a platform game entirely with a keyboard, two players can use Arduino-connected controls to influence the same real-time game. Player 1 races toward the finish; Player 2 tries to stop them by spawning monsters and obstacles.
+In *Scream and Shout*, one player races toward the finish line while the other actively tries to stop them. Physical controllers built with Arduino turn a traditional platform game into a real-time, asymmetric two-player experience. The runner can move and jump with physical buttons, and in voice mode their movement speed reacts to sound. The challenger can summon monsters, place obstacles, and adjust enemy speed with a potentiometer.
 
-Built with **Unity 2022.3.61f1c1 · C# · Arduino serial communication**. The repository also contains a **Unity WebGL build** with keyboard and browser-microphone input support.
+**Tech stack:** Unity 2022.3 LTS · C# · Arduino · Serial Communication · 2D Physics · WebGL
 
-## Project preview
+## Demo Gallery
+
+### Physical controllers
 
 <table>
   <tr>
-    <td align="center" width="42%"><img src="docs/images/hardware.jpg" alt="Arduino boards and physical controller setup used in the project" width="260"></td>
-    <td align="center" width="58%"><img src="docs/images/gameplay.jpg" alt="Scream and Shout platformer gameplay screenshot" width="430"></td>
+    <td align="center" width="50%"><img src="docs/images/controller-hardware.png" alt="Close-up photograph of Arduino, breadboards, buttons, LEDs and microphone sensor" width="310" /></td>
+    <td align="center" width="50%"><img src="docs/images/hardware-in-action.png" alt="Physical controller wired to a laptop showing the Unity game" width="310" /></td>
   </tr>
-  <tr><td align="center"><sub>Physical controller prototype (photo from project documentation)</sub></td><td align="center"><sub>Unity side-scrolling game (screenshot from project documentation)</sub></td></tr>
+  <tr>
+    <td align="center"><sub>Arduino prototype: buttons, LEDs, microphone, and analog controls</sub></td>
+    <td align="center"><sub>Hardware-to-Unity gameplay setup</sub></td>
+  </tr>
 </table>
 
-## How the two-player interaction works
+### Gameplay and interface
 
-| Role | Physical inputs | Effect in Unity |
+<table>
+  <tr>
+    <td align="center"><img src="docs/images/main-menu.png" alt="Scream and Run menu with RUN and SCREAM modes" width="420" /></td>
+    <td align="center"><img src="docs/images/gameplay.png" alt="Player character in a side-scrolling platformer level" width="420" /></td>
+  </tr>
+  <tr><td align="center"><sub>Main menu — Run / Scream</sub></td><td align="center"><sub>2D platformer gameplay</sub></td></tr>
+  <tr>
+    <td align="center"><img src="docs/images/game-over.png" alt="Game Over UI with restart button" width="420" /></td>
+    <td align="center"><img src="docs/images/victory.png" alt="Victory screen displaying completion time" width="420" /></td>
+  </tr>
+  <tr><td align="center"><sub>Game Over screen</sub></td><td align="center"><sub>Victory and completion time</sub></td></tr>
+</table>
+
+## How It Works
+
+The game has two distinct roles, each using a physical controller connected through Arduino.
+
+| | Player 1 — Runner | Player 2 — Challenger |
 | --- | --- | --- |
-| **Player 1 — Runner** | Run button, jump button, microphone | Move, jump/double-jump, and (in voice-speed mode) change running speed through sound intensity |
-| **Player 2 — Challenger** | Monster-spawn button, obstacle-spawn button, potentiometer, cooldown LEDs | Spawn a pursuing monster behind Player 1, place an obstacle ahead, adjust monster speed, and see when spawning becomes available |
+| **Objective** | Navigate the platform level, survive traps and reach the finish | Interrupt the run by spawning hazards and enemies |
+| **Controls** | Run button, jump button, microphone | Monster button, obstacle button, potentiometer |
+| **Gameplay effects** | Movement, jumping, sound-responsive speed | Enemy spawning, obstacle placement, monster speed adjustment |
+| **Feedback** | Speed, health, game state | Cooldown LEDs showing availability of spawn actions |
 
-Player 1 has **two speed modes**: a fixed movement speed and a microphone-responsive mode. On the original Arduino setup, microphone amplitude is smoothed and mapped to a playable speed range. Player 2's potentiometer measures movement intensity over a short time window to control monster speed rather than simply using the knob's absolute position.
+### RUN and SCREAM modes
 
-In the documented Arduino prototype, the spawn controls use **15-second monster** and **8-second obstacle** cooldowns, with LED feedback. The Unity scripts additionally use edge-trigger detection, debouncing, minimum spawn intervals, and spawn-window guards to prevent unintended repeated events.
+- **RUN:** conventional, fixed-speed platforming with movement and jump controls.
+- **SCREAM:** the runner's movement speed depends on microphone volume. Louder input drives higher speed within configured limits; smoothing helps avoid abrupt speed changes.
 
-## Core features
+### Hardware input pipeline
 
-- **Movement and platforming:** running, double-jumping, gravity, moving platforms, animation states, and camera follow.
-- **Adversarial interaction:** a second player's inputs can trigger enemies or hazards relative to the runner's position.
-- **Damage and recovery:** collision-based damage, health UI, checkpoint respawn, and game-over handling.
-- **Complete gameplay loop:** menu, level-end trigger, completion-time display, victory/game-over panels, and restart actions.
-- **Multiple input paths:** Arduino serial messages for physical controls; keyboard fallback and microphone-based speed for demonstrations without the hardware.
-
-## Arduino → Unity communication
-
-`Assets/SerialInput.cs` receives comma-separated values from the serial port. The documented message format is:
+Arduino sends a six-field, comma-separated message to Unity:
 
 ```text
 move,jump,playerSpeed,monsterSpeed,monsterReady,obstacleReady
 ```
 
-For example, the parser can receive `0,1,8,7,1,1`. Movement and jump signals are interpreted in Unity; the two `Ready` fields are used to detect a transition from **ready → not ready**, which triggers spawning once rather than once per frame.
+The Unity receiver in `Assets/SerialInput.cs` parses these values and passes them to the movement and spawning systems. The original controller design uses microphone readings for runner speed and changes in potentiometer position over a short time window for monster speed.
 
-| Arduino signal | Documented pin |
+**Hardware input design:**
+
+- Player 1: run and jump push buttons; microphone input for speed control.
+- Player 2: dedicated buttons for spawning monsters and obstacles; potentiometer for monster speed.
+- Cooldown indicators: LEDs indicate when spawning actions are ready.
+- The hardware design specifies **15-second monster** and **8-second obstacle** cooldown periods.
+
+On the Unity side, spawn scripts use **falling-edge triggers, debouncing, minimum spawn intervals, and one-spawn-per-cycle guards**, reducing accidental repeated activations from held buttons or noisy signals.
+
+> **Note:** The repository currently includes the Unity serial receiver and gameplay scripts. The Arduino-side logic is documented in the original design material, but there is not yet a standalone `.ino` sketch in this repository.
+
+## Gameplay Features
+
+- **Player movement:** movement acceleration/deceleration, running, jumping, double jumping, ground detection, and animations.
+- **Dynamic level elements:** moving platforms, saws, collisions and hazards.
+- **Adversarial spawning:** monsters appear behind the runner; obstacles appear in front, with rate limiting and signal stability controls.
+- **Health and checkpoints:** damage cooldown, three-life default, respawn at checkpoint, and health UI events.
+- **Completion and restart:** game-over and victory screens, elapsed-time feedback, and scene restart.
+- **Camera:** Cinemachine follow camera for side-scrolling play.
+- **Input options:** Arduino serial hardware, keyboard fallback, and microphone-based speed control.
+
+## Project Structure
+
+```text
+Assets/
+├── SerialInput.cs                    # Arduino serial receiver
+├── Plugins/WebGL/
+│   └── WebGLMicrophone.jslib         # Browser microphone bridge
+├── Scenes/
+│   ├── Menu.unity
+│   └── SampleScene.unity
+└── script/
+    ├── Player/                      # Movement, jump, health, respawn
+    ├── Monster/                     # Monster and obstacle spawning
+    ├── Platform1move.cs             # Moving platform behavior
+    ├── GameOverUI.cs
+    └── LevelEndTrigger.cs
+WebGLBuild/                         # Prebuilt browser version
+└── index.html
+```
+
+## Run Locally
+
+1. Clone this repository:
+
+   ```bash
+   git clone https://github.com/sylviaaaai/Scream-and-shout.git
+   ```
+2. Open the folder with **Unity 2022.3.61f1c1**, or a compatible Unity 2022.3 LTS release.
+3. Open `Assets/Scenes/Menu.unity` to play from the menu, or `Assets/Scenes/SampleScene.unity` for the level.
+4. Use keyboard controls if you don't have an Arduino: **D / →** for movement, **Space / W / ↑** for jumping. When enabled, **J** spawns a monster and **K** spawns an obstacle.
+5. For Arduino input, connect the hardware, match the serial port and baud rate, and enable `SerialInput` in the Unity Inspector.
+
+Default serial settings in the source: **COM3**, **230400 baud**. Change these to match your machine and hardware.
+
+## WebGL Preview
+
+A built browser version already exists in [`WebGLBuild/`](WebGLBuild/). It includes the loader, compressed Unity assets, and supporting headers for static hosting. It is **not yet linked here as a verified live deployment**.
+
+- Browser gameplay supports keyboard input, with a WebGL-specific JavaScript microphone bridge for voice-speed mode.
+- Desktop Arduino serial access through `System.IO.Ports` is **not available directly in a normal WebGL browser build**. Demonstrating the physical controllers requires the local Unity setup.
+- A public WebGL deployment must be tested for file loading, microphone permissions, keyboard input and restart behavior. Browser microphone access generally requires HTTPS or localhost.
+
+## Technical Highlights
+
+| System | Implementation |
 | --- | --- |
-| Player 1 move / jump buttons | D2 / D3 |
-| Microphone / potentiometer | A0 / A1 |
-| Monster / obstacle spawn buttons | D5 / D6 |
-| Monster / obstacle cooldown LEDs | D7 / D8 |
+| **Arduino serial protocol** | Six values parsed in Unity with startup-neutral handling and timeout protection |
+| **Robust interaction** | Signal edge detection and debouncing to avoid multiple spawns from a single action |
+| **Voice-driven movement** | Volume mapped to player speed, bounded and smoothed |
+| **Physics and motion** | `Rigidbody2D`, collisions, jump-state management, moving platforms |
+| **Game state** | Health events, checkpoint respawning, victory/game-over state transitions |
+| **Browser compatibility** | WebGL microphone integration with keyboard fallback |
 
-**Serial defaults:** `COM3` and `230400` baud. These settings must match the connected Arduino and can be changed in Unity's `SerialInput` Inspector. The `enableSerialInput` field is disabled by default in the script, so enable it in Unity when using a connected board.
+## Asset Credits
 
-**Source-code scope:** The Unity C# receiver and gameplay scripts are in this repository. The Arduino-side program is illustrated in the original course documentation, but no standalone `.ino` source file is included in this repository.
-
-## Key implementation files
-
-| File | Responsibility |
-| --- | --- |
-| `Assets/SerialInput.cs` | Open serial port, parse six values, guard startup state, and close connection |
-| `Assets/script/Player/PlayerMove.cs` | Keyboard/serial movement, optional microphone speed, acceleration, animations |
-| `Assets/script/Player/PlayerJump.cs` | Ground and double-jump logic, input-edge handling |
-| `Assets/script/Monster/MonsterSpawner.cs` | Debounced, edge-triggered monster spawning with cooldown guards |
-| `Assets/script/Monster/ObstacleSpawner.cs` | Obstacle spawning with the same signal-stability safeguards |
-| `Assets/script/Player/HealthManager.cs` | Health state and event notifications |
-| `Assets/script/Player/PlayerDead.cs` | Hazard collisions, damage cooldowns, and out-of-bounds checks |
-| `Assets/script/Player/PlayerSpawnController.cs` | Checkpoints and respawn handling |
-| `Assets/script/LevelEndTrigger.cs` / `GameOverUI.cs` | Victory, defeat, timers, and restart |
-| `Assets/Plugins/WebGL/WebGLMicrophone.jslib` | Browser microphone volume bridge for WebGL |
-
-## Run the Unity project
-
-1. Clone or download this repository.
-2. Open it using **Unity 2022.3.61f1c1** (or another compatible Unity 2022.3 LTS version).
-3. Open `Assets/Scenes/Menu.unity` to start at the menu, or `Assets/Scenes/SampleScene.unity` to inspect the gameplay level.
-4. For **Arduino controls**, connect the boards and verify the correct COM port, baud rate, and `enableSerialInput` setting on the `SerialInput` component.
-5. For **keyboard fallback**, use **D / →** to move and **Space / W / ↑** to jump; **J** and **K** can trigger monster/obstacle spawning when keyboard spawning is enabled.
-6. Press **Play** in the Unity Editor.
-
-Hardware mapping, serial port availability, and behavior depend on your connected Arduino configuration and Unity Inspector settings.
-
-## WebGL build (for browser demonstrations)
-
-A prebuilt browser version is available in **[`WebGLBuild/`](WebGLBuild/)**. It includes the game loader, Brotli-compressed build assets, and an HTTP `_headers` configuration for static hosting. No public live-demo URL is claimed here until a deployment has been tested.
-
-**Important:** A normal Unity WebGL page cannot directly open a Windows `COM3` serial port using the desktop `System.IO.Ports` API. The browser build should be treated as a **keyboard/microphone demonstration**, not as a drop-in replacement for the physical Arduino installation. Browser microphone input requires permission and a secure context (HTTPS or localhost).
-
-For hosting, publish the **contents** of `WebGLBuild/` as a static site and ensure `.br` assets receive the correct `Content-Encoding: br` and MIME types. Test loading, keyboard controls, microphone permissions, and restart flow before sharing a demo link.
-
-## Implementation and design notes
-
-This project uses small Unity components rather than one monolithic player controller. Damage is linked to the health system through events; respawning is handled separately; spawning guards compensate for noisy or held hardware inputs. The physical controller design turns a typical solo platformer into a two-person adversarial interaction.
-
-The hardware and gameplay images illustrate the physical controller setup and running game.
-
-## Assets and acknowledgment
-
-Pixel-art character/environment assets use **[Pixel Adventure 1](https://assetstore.unity.com/packages/2d/characters/pixel-adventure-1-155360)** from the Unity Asset Store. Those visuals are third-party assets; the project's Unity/Arduino integration and gameplay scripts are separate work. Please review the original asset license before reusing or redistributing any included third-party assets.
+The game uses **[Pixel Adventure 1](https://assetstore.unity.com/packages/2d/characters/pixel-adventure-1-155360)** assets from the Unity Asset Store for character and environmental artwork. These are third-party assets, not original artwork. Review their license before reusing or redistributing them.
 
 ---
 
-*Scream and Shout · Unity × Arduino · Physical Interaction Design*
+**Scream and Shout** · Unity × Arduino · Interactive Gameplay & Physical Computing
