@@ -2,7 +2,7 @@
 
 **A two-player Unity × Arduino interactive 2D platformer.**
 
-This course project explores **physical–digital interaction**: instead of controlling a platform game entirely with a keyboard, two players can use Arduino-connected controls to influence the same real-time game. Player 1 races toward the finish; Player 2 tries to stop them by spawning monsters and obstacles.
+This project explores **physical–digital interaction**: instead of controlling a platform game entirely with a keyboard, two players can use Arduino-connected controls to influence the same real-time game. Player 1 races toward the finish; Player 2 tries to stop them by spawning monsters and obstacles.
 
 Built with **Unity 2022.3.61f1c1 · C# · Arduino serial communication**. The repository also contains a **Unity WebGL build** with keyboard and browser-microphone input support.
 
