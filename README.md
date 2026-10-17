@@ -1,4 +1,4 @@
-# Scream and Shout 🎮
+# Scream and Shout 
 
 **A two-player, hardware-interactive 2D platformer built with Unity, C#, and Arduino.**
 
