@@ -17,7 +17,7 @@ The online version is a playable **browser preview** of *Scream and Shout*. It d
 | **Player 1 — Runner** | Hold **D / →** to run; **Space / W / ↑** to jump (including a second jump in midair) |
 | **Player 2 — Challenger** | **J** to spawn a monster, **K** to spawn an obstacle; **Right Shift** can increase monster speed when enabled |
 
-**Preview limitations:** The browser build does not directly connect to the physical Arduino controllers. Some UI elements (such as the exit/back-to-menu button and health display) may be missing or clipped in the current WebGL build. A browser-specific microphone interface is included for SCREAM mode; microphone permissions and compatibility vary by browser. This is a simplified demo, not a substitute for the complete hardware-integrated experience.
+**Preview limitations:** The browser build does not directly connect to the physical Arduino controllers. For the best experience, switch the game to **fullscreen mode**: the Exit/back-to-menu button, health counter, and speed indicator are visible there. In the smaller embedded browser view, some of these UI elements may be cropped because of the current canvas layout. A browser-specific microphone interface is included for SCREAM mode; microphone permissions and compatibility vary by browser. This is a simplified demo, not a substitute for the complete hardware-integrated experience.
 
 For the **hardware-integrated version**, clone the Unity project, upload the included [Arduino sketch](arduino/Finalgame/Finalgame.ino) to a compatible board, wire the controls as documented below, and configure the Unity serial port locally.
 
