@@ -2,7 +2,7 @@
 
 **A two-player, hardware-interactive 2D platformer built with Unity, C#, and Arduino.**
 
-In *Scream and Shout*, one player races toward the finish line while the other actively tries to stop them. Physical controllers built with Arduino turn a traditional platform game into a real-time, asymmetric two-player experience. The runner can move and jump with physical buttons, and in voice mode their movement speed reacts to sound. The challenger can summon monsters, place obstacles, and adjust enemy speed with a potentiometer.
+In *Scream and Shout*, one player races toward the finish line while the other actively tries to stop the runner by spawning monsters and obstacles. Physical controllers built with Arduino turn a traditional platform game into a real-time, asymmetric two-player experience. The runner can move and jump with physical buttons, and in voice mode their movement speed reacts to sound. The challenger can summon monsters, place obstacles, and adjust enemy speed with a potentiometer.
 
 **Tech stack:** Unity 2022.3 LTS · C# · Arduino · Serial Communication · 2D Physics · WebGL
 
