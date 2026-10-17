@@ -6,6 +6,21 @@ In *Scream and Shout*, one player races toward the finish line while the other a
 
 **Tech stack:** Unity 2022.3 LTS · C# · Arduino · Serial Communication · 2D Physics · WebGL
 
+## 🎮 Play Online
+
+**[▶ Play the simplified WebGL demo](https://runningame.netlify.app/)**
+
+The online version is a playable **browser preview** of *Scream and Shout*. It demonstrates the core platforming and two-player challenge mechanics with keyboard controls, without requiring Unity or Arduino hardware.
+
+| Player | Controls in the browser build |
+| --- | --- |
+| **Player 1 — Runner** | Hold **D / →** to run; **Space / W / ↑** to jump (including a second jump in midair) |
+| **Player 2 — Challenger** | **J** to spawn a monster, **K** to spawn an obstacle; **Right Shift** can increase monster speed when enabled |
+
+**Preview limitations:** The browser build does not directly connect to the physical Arduino controllers. Some UI elements (such as the exit/back-to-menu button and health display) may be missing or clipped in the current WebGL build. A browser-specific microphone interface is included for SCREAM mode; microphone permissions and compatibility vary by browser. This is a simplified demo, not a substitute for the complete hardware-integrated experience.
+
+For the **hardware-integrated version**, clone the Unity project, upload the included [Arduino sketch](arduino/Finalgame/Finalgame.ino) to a compatible board, wire the controls as documented below, and configure the Unity serial port locally.
+
 ## Demo Gallery
 
 ### Physical controllers
@@ -71,7 +86,16 @@ The Unity receiver in `Assets/SerialInput.cs` parses these values and passes the
 
 On the Unity side, spawn scripts use **falling-edge triggers, debouncing, minimum spawn intervals, and one-spawn-per-cycle guards**, reducing accidental repeated activations from held buttons or noisy signals.
 
-> **Note:** The repository currently includes the Unity serial receiver and gameplay scripts. The Arduino-side logic is documented in the original design material, but there is not yet a standalone `.ino` sketch in this repository.
+**Arduino firmware:** [`arduino/Finalgame/Finalgame.ino`](arduino/Finalgame/Finalgame.ino) contains the controller program used to send the six-field serial input to Unity. Upload it using the Arduino IDE after connecting the hardware.
+
+| Arduino pin | Input or output |
+| --- | --- |
+| D2 / D3 | Runner: movement / jump buttons |
+| A0 / A1 | Microphone / challenger potentiometer |
+| D5 / D6 | Challenger: monster / obstacle buttons |
+| D7 / D8 | Monster / obstacle cooldown indicator LEDs |
+
+The sketch uses `INPUT_PULLUP` for buttons (pressed = LOW), a serial baud rate of **230400**, a **15-second monster cooldown**, and an **8-second obstacle cooldown**. Match the board's wiring and serial port to your setup; confirm your microphone sensor is compatible with the analog input and supply voltage.
 
 ## Gameplay Features
 
@@ -99,6 +123,8 @@ Assets/
     ├── Platform1move.cs             # Moving platform behavior
     ├── GameOverUI.cs
     └── LevelEndTrigger.cs
+arduino/Finalgame/
+└── Finalgame.ino                   # Arduino controller firmware
 WebGLBuild/                         # Prebuilt browser version
 └── index.html
 ```
@@ -113,17 +139,16 @@ WebGLBuild/                         # Prebuilt browser version
 2. Open the folder with **Unity 2022.3.61f1c1**, or a compatible Unity 2022.3 LTS release.
 3. Open `Assets/Scenes/Menu.unity` to play from the menu, or `Assets/Scenes/SampleScene.unity` for the level.
 4. Use keyboard controls if you don't have an Arduino: **D / →** for movement, **Space / W / ↑** for jumping. When enabled, **J** spawns a monster and **K** spawns an obstacle.
-5. For Arduino input, connect the hardware, match the serial port and baud rate, and enable `SerialInput` in the Unity Inspector.
+5. For **physical controller input**, open [`arduino/Finalgame/Finalgame.ino`](arduino/Finalgame/Finalgame.ino) in the Arduino IDE and upload it to a compatible Arduino board. Wire the buttons, microphone, potentiometer and LEDs according to the pin table above.
+6. In Unity's `SerialInput` component, enable serial input and set the correct COM port and **230400 baud**. Close other applications holding the serial port, then run the game in the Unity Editor.
 
 Default serial settings in the source: **COM3**, **230400 baud**. Change these to match your machine and hardware.
 
-## WebGL Preview
+## WebGL Build & Hosting
 
-A built browser version already exists in [`WebGLBuild/`](WebGLBuild/). It includes the loader, compressed Unity assets, and supporting headers for static hosting. It is **not yet linked here as a verified live deployment**.
+The prebuilt browser files are in [`WebGLBuild/`](WebGLBuild/), and the public browser preview is linked in **[Play Online](https://runningame.netlify.app/)** above. The web build uses keyboard input and includes a JavaScript microphone bridge. Browser microphone use typically requires HTTPS or localhost and user permission.
 
-- Browser gameplay supports keyboard input, with a WebGL-specific JavaScript microphone bridge for voice-speed mode.
-- Desktop Arduino serial access through `System.IO.Ports` is **not available directly in a normal WebGL browser build**. Demonstrating the physical controllers requires the local Unity setup.
-- A public WebGL deployment must be tested for file loading, microphone permissions, keyboard input and restart behavior. Browser microphone access generally requires HTTPS or localhost.
+**WebGL does not provide direct access to the desktop Unity `System.IO.Ports` / COM-port interface**, so the Arduino controllers are intended for the locally run Unity project. The published preview may differ from the latest Unity source: after changing gameplay code or scene UI in Unity, the WebGL build needs to be regenerated before the changes appear online.
 
 ## Technical Highlights
 
