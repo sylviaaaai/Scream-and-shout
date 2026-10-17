@@ -8,18 +8,21 @@ In *Scream and Shout*, one player races toward the finish line while the other a
 
 ## 🎮 Play Online
 
-**[▶ Play the simplified WebGL demo](https://runningame.netlify.app/)**
+**[▶ Play the WebGL Demo](https://runningame.netlify.app/)**
 
-The online version is a playable **browser preview** of *Scream and Shout*. It demonstrates the core platforming and two-player challenge mechanics with keyboard controls, without requiring Unity or Arduino hardware.
+> [!IMPORTANT]
+> **Online Demo — Limited Preview**
+>
+> The online version is **not the complete version of *Scream and Shout***. It is a simplified, playable preview intended to showcase **basic gameplay and selected two-player interactions** through browser-based controls. It does **not** reproduce the full physical Arduino controller experience.
+>
+> To explore the hardware-integrated version, download the Unity project and use the included [Arduino sketch](arduino/Finalgame/Finalgame.ino) with a compatible, correctly wired hardware setup.
 
 | Player | Controls in the browser build |
 | --- | --- |
 | **Player 1 — Runner** | Hold **D / →** to run; **Space / W / ↑** to jump (including a second jump in midair) |
 | **Player 2 — Challenger** | **J** to spawn a monster, **K** to spawn an obstacle; **Right Shift** can increase monster speed when enabled |
 
-**Preview limitations:** The browser build does not directly connect to the physical Arduino controllers. For the best experience, switch the game to **fullscreen mode**: the Exit/back-to-menu button, health counter, and speed indicator are visible there. In the smaller embedded browser view, some of these UI elements may be cropped because of the current canvas layout. A browser-specific microphone interface is included for SCREAM mode; microphone permissions and compatibility vary by browser. This is a simplified demo, not a substitute for the complete hardware-integrated experience.
-
-For the **hardware-integrated version**, clone the Unity project, upload the included [Arduino sketch](arduino/Finalgame/Finalgame.ino) to a compatible board, wire the controls as documented below, and configure the Unity serial port locally.
+**Browser-specific notes:** The browser build cannot directly communicate with the Arduino controllers. For the best experience, switch to **fullscreen mode**: the Exit/back-to-menu button, health counter, and speed indicator are visible there. In the smaller embedded view, some UI elements may be cropped by the current canvas layout. A browser-specific microphone interface is included for SCREAM mode; microphone permissions and compatibility vary by browser.
 
 ## Demo Gallery
 
